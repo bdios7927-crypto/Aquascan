@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaScan</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0EA5E9; min-height: 100vh; }
+    #pantalla1 { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; color: white; text-align: center; padding: 20px; }
+    .gota { font-size: 100px; margin-bottom: 20px; }
+    h1 { font-size: 42px; margin-bottom: 10px; }
+    .subtitle { font-size: 18px; color: #BAE6FD; margin-bottom: 50px; }
+    button { background: white; color: #0EA5E9; border: none; padding: 18px 60px; border-radius: 30px; font-size: 20px; font-weight: bold; width: 80%; max-width: 300px; }
+    #pantalla2, #pantalla3, #pantallaCarga { display: none; min-height: 100vh; padding: 20px; text-align: center; }
+    #pantalla2 { background: #0F172A; color: white; }
+    #pantalla2 h2 { margin-top: 60px; font-size: 28px; }
+    .marco { width: 300px; height: 300px; border: 4px solid #0EA5E9; border-radius: 25px; margin: 40px auto; display: flex; align-items: center; justify-content: center; }
+    .marco p { color: #94A3B8; font-size: 20px; }
+    input { display: none; }
+    .btn-camara { background: white; color: #0EA5E9; border: none; width: 90px; height: 90px; border-radius: 50%; font-size: 40px; margin: 20px auto; display: flex; align-items: center; justify-content: center; }
+    .texto-ayuda { color: #64748B; font-size: 16px; margin-top: 20px; }
+    .limpio { background: #ECFDF5; } .revisar { background: #FFFBEB; } .nopotable { background: #FEF2F2; }
+    .circulo { width: 120px; height: 120px; border-radius: 50%; margin: 50px auto 20px; display: flex; align-items: center; justify-content: center; font-size: 60px; color: white; }
+    .verde { background: #10B981; } .amarillo { background: #F59E0B; } .rojo { background: #EF4444; }
+    .resultado-titulo { font-size: 36px; font-weight: 800; margin: 20px 0; }
+    .limpio .resultado-titulo { color: #10B981; } .revisar .resultado-titulo { color: #F59E0B; } .nopotable .resultado-titulo { color: #EF4444; }
+    .confianza { color: #64748B; font-size: 20px; margin-bottom: 30px; }
+    .tarjeta { background: white; border-radius: 20px; padding: 25px; margin: 20px auto; max-width: 350px; text-align: left; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+    .tarjeta p { color: #1E293B; margin: 15px 0; font-size: 18px; }
+    .btn-nuevo { background: #0EA5E9; color: white; border: none; padding: 18px 50px; border-radius: 30px; font-size: 18px; font-weight: bold; width: 80%; max-width: 300px; margin-top: 20px; }
+    #pantallaCarga { background: #0EA5E9; flex-direction: column; align-items: center; justify-content: center; color: white; }
+    .loader { width: 80px; height: 80px; border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 30px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .analizando-texto { font-size: 24px; font-weight: bold; }
+    .analizando-sub { color: #BAE6FD; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <div id="pantalla1">
+    <div class="gota">💧</div>
+    <h1>AquaScan</h1>
+    <p class="subtitle">Verifica tu agua en segundos</p>
+    <button onclick="irPantalla2()">Comenzar</button>
+  </div>
+
+  <div id="pantalla2">
+    <h2>📸 Escanear agua</h2>
+    <div class="marco"><p>Coloca el vaso aquí</p></div>
+    <input type="file" accept="image/*" capture="environment" id="fotoInput" onchange="analizar()">
+    <button class="btn-camara" onclick="document.getElementById('fotoInput').click()">📷</button>
+    <p class="texto-ayuda">Toca para tomar foto</p>
+  </div>
+
+  <div id="pantallaCarga">
+    <div class="loader"></div>
+    <p class="analizando-texto">Analizando...</p>
+    <p class="analizando-sub">Esto tomará unos segundos</p>
+  </div>
+
+  <div id="pantalla3">
+    <div id="iconoResultado" class="circulo verde">✓</div>
+    <h2 id="textoResultado" class="resultado-titulo">¡AGUA LIMPIA!</h2>
+    <p class="confianza" id="confianza">Confianza: 94%</p>
+    <div class="tarjeta">
+      <p id="detalle1">✓ Transparente</p>
+      <p id="detalle2">✓ Sin partículas</p>
+      <p id="detalle3">✓ Color normal</p>
+    </div>
+    <button class="btn-nuevo" onclick="volverInicio()">Nuevo escaneo</button>
+  </div>
+
+  <script>
+    function irPantalla2() { document.getElementById('pantalla1').style.display='none'; document.getElementById('pantalla2').style.display='block'; }
+    function volverInicio() { document.getElementById('pantalla2').style.display='none'; document.getElementById('pantalla3').style.display='none'; document.getElementById('pantallaCarga').style.display='none'; document.getElementById('pantalla1').style.display='flex'; }
+    function analizar() {
+      document.getElementById('pantalla2').style.display='none';
+      document.getElementById('pantallaCarga').style.display='flex';
+      setTimeout(function() {
+        document.getElementById('pantallaCarga').style.display='none';
+        document.getElementById('pantalla3').style.display='block';
+        const resultados=['limpio','revisar','nopotable'];
+        const resultado=resultados[Math.floor(Math.random()*resultados.length)];
+        const pantalla3=document.getElementById('pantalla3');
+        const icono=document.getElementById('iconoResultado');
+        const texto=document.getElementById('textoResultado');
+        const confianza=document.getElementById('confianza');
+        pantalla3.className=resultado;
+        if(resultado==='limpio'){ icono.className='circulo verde'; icono.innerText='✓'; texto.innerText='¡AGUA LIMPIA!'; confianza.innerText='Confianza: 94%'; document.getElementById('detalle1').innerText='✓ Transparente'; document.getElementById('detalle2').innerText='✓ Sin partículas visibles'; document.getElementById('detalle3').innerText='✓ Color normal'; }
+        else if(resultado==='revisar'){ icono.className='circulo amarillo'; icono.innerText='!'; texto.innerText='REVISAR'; confianza.innerText='Confianza: 78%'; document.getElementById('detalle1').innerText='⚠ Turbidez leve'; document.getElementById('detalle2').innerText='✓ Color normal'; document.getElementById('detalle3').innerText='⚠ Partículas pequeñas'; }
+        else { icono.className='circulo rojo'; icono.innerText='✕'; texto.innerText='NO POTABLE'; confianza.innerText='Confianza: 91%'; document.getElementById('detalle1').innerText='✕ Agua turbia'; document.getElementById('detalle2').innerText='✕ Color anómalo'; document.getElementById('detalle3').innerText='✕ Sedimento visible'; }
+      }, 2000);
+    }
+  </script>
+
+</body>
+</html>
